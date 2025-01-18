@@ -1,23 +1,25 @@
 use std::{env, time::Duration};
 
 pub trait EnvConfig<T> {
-    fn get(env_var: &str, default: Option<T>) -> Option<Self> where Self:Sized;
+    fn get(env_var: &str, default: Option<T>) -> Option<Self>
+    where
+        Self: Sized;
 }
 
 impl EnvConfig<bool> for bool {
     fn get(env_var: &str, default: Option<bool>) -> Option<Self> {
         let result = env::var(env_var.to_uppercase());
         if result.is_err() {
-            return default
+            return default;
         }
 
         let text = result.unwrap();
         let lower = text.to_lowercase();
         if lower == "1" || lower == "true" || lower == "t" {
-            return Some(true)
+            return Some(true);
         }
 
-        return Some(false)
+        return Some(false);
     }
 }
 
@@ -25,7 +27,7 @@ impl EnvConfig<String> for String {
     fn get(env_var: &str, default: Option<String>) -> Option<Self> {
         let result = env::var(env_var.to_uppercase());
         if result.is_err() {
-            return default
+            return default;
         }
 
         return Some(result.unwrap());
@@ -36,12 +38,12 @@ impl EnvConfig<Duration> for Duration {
     fn get(env_var: &str, default: Option<Duration>) -> Option<Self> {
         let result = env::var(env_var.to_uppercase());
         if result.is_err() {
-            return default
+            return default;
         }
 
         let dur_text = result.unwrap();
         let interval_text = dur_text[0..(dur_text.len() - 1)].to_string();
-        let interval_result= interval_text.parse::<u64>();
+        let interval_result = interval_text.parse::<u64>();
         if interval_result.is_err() {
             return default;
         }
@@ -49,14 +51,13 @@ impl EnvConfig<Duration> for Duration {
         let interval = interval_result.unwrap();
         match dur_text[(dur_text.len() - 1)..].to_string().as_str() {
             "s" => Some(Duration::from_secs(interval)),
-            "m" => Some(Duration::from_secs(interval*60)),
-            "h" => Some(Duration::from_secs(interval*60*60)),
-            "d" => Some(Duration::from_secs(interval*60*60*24)),
+            "m" => Some(Duration::from_secs(interval * 60)),
+            "h" => Some(Duration::from_secs(interval * 60 * 60)),
+            "d" => Some(Duration::from_secs(interval * 60 * 60 * 24)),
             _ => default,
         }
     }
 }
-
 
 macro_rules! impl_numeric {
     ($t0:ty) => {
@@ -64,18 +65,18 @@ macro_rules! impl_numeric {
             fn get(env_var: &str, default: Option<$t0>) -> Option<Self> {
                 let result = env::var(env_var.to_uppercase());
                 if result.is_err() {
-                    return default
+                    return default;
                 }
 
                 let result = result.unwrap().parse::<$t0>();
                 if result.is_err() {
-                    return default
+                    return default;
                 }
 
                 return Some(result.unwrap());
             }
         }
-    }
+    };
 }
 
 impl_numeric!(u8);
